@@ -61,7 +61,7 @@ public class Url
 
     public void shorten(){
         ArrayList<Character> arr = new ArrayList<Character>();
-        long num = this.id + (long)(Math.pow(62.0, 3.0));
+        long num = this.id + (long)(Math.pow(62.0, 2.5));
         char remainder;
 
         while(num > 0){
