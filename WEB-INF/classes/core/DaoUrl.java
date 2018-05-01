@@ -1,3 +1,5 @@
+package core;
+
 import java.sql.*;
 import java.util.logging.*;
 
@@ -38,13 +40,15 @@ public class DaoUrl
     }
 
     public boolean save(Url url){
+
+        if(this.findByShortened(url) != null){
+            return false;
+        }
+
         openConnection();
         try{
             if(conn==null){
                 System.out.println("conn is null");
-                return false;
-            }
-            if(this.findByShortened(url) == null){
                 return false;
             }
             if(url.getShortened() == null){
@@ -52,7 +56,7 @@ public class DaoUrl
             }
             stmt = conn.createStatement();
             String sql = "INSERT INTO " + tbl_url
-                + " (real, shortened)"
+                + " (`real`, shortened)"
                 + "VALUES ("
                 + "'" + url.getReal() + "'"
                 + ", '" + url.getShortened() + "'"
@@ -63,6 +67,10 @@ public class DaoUrl
         }
 
         closeConnection();
+
+        url = this.findByReal(url);
+        url.shorten();
+        this.update(url.getId(), url);
 
         return true;
     }
@@ -76,8 +84,7 @@ public class DaoUrl
             }
             stmt = conn.createStatement();
             String sql = "UPDATE " + tbl_url
-                + " SET real = '" + url.getReal() + "'"
-                + ", shortened = '" + url.getShortened() + "'"
+                + " SET shortened = '" + url.getShortened() + "'"
                 +" WHERE id=" + id;
 
             stmt.executeUpdate(sql);
@@ -105,6 +112,33 @@ public class DaoUrl
         closeConnection();
     }
 
+    public Url findByReal(Url url){
+        Url new_url = null;
+        openConnection();
+        try{
+            if(conn==null){
+                System.out.println("conn is null");
+                return null;
+            }
+            stmt = conn.createStatement();
+            String sql = "SELECT * FROM " + tbl_url + " WHERE `real` ='" + url.getReal()+"'";
+            ResultSet rs = stmt.executeQuery(sql);
+            if(rs.first()){
+                long nid = rs.getLong("id");
+                String real = rs.getString("real");
+                String shortened = rs.getString("shortened");
+                new_url = new Url(nid, real, shortened);
+
+                rs.close();
+            }
+        }catch(SQLException ex){
+                Logger.getLogger(DaoUrl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        closeConnection();
+        return new_url;
+    }
+
     public Url findByShortened(Url url){
         Url new_url = null;
         openConnection();
@@ -118,12 +152,9 @@ public class DaoUrl
             ResultSet rs = stmt.executeQuery(sql);
             if(rs.first()){
                 long nid = rs.getLong("id");
-                String user = rs.getString("user");
-                String pass = rs.getString("pass");
-                long saldo = rs.getLong("saldo");
-                if(pass.equals(nasabah.getPass())){
-                    new_url = new Nasabah(nid, user, pass, saldo);
-                }
+                String real = rs.getString("real");
+                String shortened = rs.getString("shortened");
+                new_url = new Url(nid, real, shortened);
 
                 rs.close();
             }
@@ -145,8 +176,6 @@ public class DaoUrl
             }
             stmt = conn.createStatement();
             String sql = "SELECT * FROM " + tbl_url + " WHERE id=" + id;
-            stmt.executeUpdate(sql);
-
             ResultSet rs = stmt.executeQuery(sql);
             if(rs.first()){
                 long nid = rs.getLong("id");
@@ -206,7 +235,7 @@ public class DaoUrl
             stmt = conn.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS " + tbl_url + " "
                 + "(id INTEGER NOT NULL AUTO_INCREMENT,"
-                + " real VARCHAR(255), "
+                + " `real` VARCHAR(255), "
                 + " shortened VARCHAR(255), "
                 + " PRIMARY KEY ( id ))";
 

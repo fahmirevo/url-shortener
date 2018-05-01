@@ -1,3 +1,5 @@
+package core;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -14,9 +16,10 @@ public class Url
     public Url(long id, String real){
         this.id = id;
         this.real = real;
+        this.shortened = null;
     }
 
-    public Url(long id, String real, String shotened){
+    public Url(long id, String real, String shortened){
         this.id = id;
         this.real = real;
         this.shortened = shortened;
@@ -48,14 +51,16 @@ public class Url
 
     public void shorten(){
         ArrayList<Character> arr = new ArrayList<Character>();
-        long num = this.id + 1000;
+        long num = this.id + 100000;
         char remainder;
 
         while(num > 0){
-            remainder = num % 62;
+            remainder = (char)(num % 62);
 
-            if(remainder > 9){
+            if(remainder > 9 && remainder <= 35){
                 remainder += 55;
+            }else if(remainder > 35){
+                remainder += 61;
             }
 
             arr.add(remainder);
