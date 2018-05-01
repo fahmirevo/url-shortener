@@ -68,10 +68,6 @@ public class DaoUrl
 
         closeConnection();
 
-        url = this.findByReal(url);
-        url.shorten();
-        this.update(url.getId(), url);
-
         return true;
     }
 
@@ -112,33 +108,6 @@ public class DaoUrl
         closeConnection();
     }
 
-    public Url findByReal(Url url){
-        Url new_url = null;
-        openConnection();
-        try{
-            if(conn==null){
-                System.out.println("conn is null");
-                return null;
-            }
-            stmt = conn.createStatement();
-            String sql = "SELECT * FROM " + tbl_url + " WHERE `real` ='" + url.getReal()+"'";
-            ResultSet rs = stmt.executeQuery(sql);
-            if(rs.first()){
-                long nid = rs.getLong("id");
-                String real = rs.getString("real");
-                String shortened = rs.getString("shortened");
-                new_url = new Url(nid, real, shortened);
-
-                rs.close();
-            }
-        }catch(SQLException ex){
-                Logger.getLogger(DaoUrl.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        closeConnection();
-        return new_url;
-    }
-
     public Url findByShortened(Url url){
         Url new_url = null;
         openConnection();
@@ -154,7 +123,10 @@ public class DaoUrl
                 long nid = rs.getLong("id");
                 String real = rs.getString("real");
                 String shortened = rs.getString("shortened");
-                new_url = new Url(nid, real, shortened);
+                String password = rs.getString("password");
+                if(password.equals(url.getPassword())){
+                    new_url = new Url(nid, real, shortened);
+                }
 
                 rs.close();
             }
@@ -181,7 +153,10 @@ public class DaoUrl
                 long nid = rs.getLong("id");
                 String real = rs.getString("real");
                 String shortened = rs.getString("shortened");
-                url = new Url(nid, real, shortened);
+                String password = rs.getString("password");
+                if(password.equals(url.getPassword())){
+                    new_url = new Url(nid, real, shortened);
+                }
 
                 rs.close();
             }
@@ -237,6 +212,7 @@ public class DaoUrl
                 + "(id INTEGER NOT NULL AUTO_INCREMENT,"
                 + " `real` VARCHAR(255), "
                 + " shortened VARCHAR(255), "
+                + " password VARCHAR(255), "
                 + " PRIMARY KEY ( id ))";
 
             stmt.executeUpdate(sql);
