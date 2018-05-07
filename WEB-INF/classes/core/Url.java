@@ -10,6 +10,12 @@ public class Url
     private String shortened;
     private String password;
 
+    public Url(){
+        this.real = "PASSWORD PROTECTED";
+        this.shortened = "PASSWORD PROTECTED";
+        this.password = "PASSWORD PROTECTED";
+    }
+
     public Url(String real){
         this.real = real;
         this.password = "";
@@ -55,8 +61,16 @@ public class Url
         return this.shortened;
     }
 
-    public void setCode(String shortened){
+    public void setShortened(String shortened){
         this.shortened = shortened;
+    }
+
+    public String getPassword(){
+        return this.password;
+    }
+
+    public void setPassword(String password){
+        this.password = password;
     }
 
     public void shorten(){
@@ -90,4 +104,3 @@ public class Url
         this.shortened = builder.toString();
     }
 }
-
