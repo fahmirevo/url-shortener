@@ -39,17 +39,18 @@ public class DaoUrl
         }
     }
 
-    public boolean save(Url url){
+    public Url save(Url url){
+        Url new_url = null;
 
         if(this.findByShortened(url) != null){
-            return false;
+            return new_url;
         }
 
         openConnection();
         try{
             if(conn==null){
                 System.out.println("conn is null");
-                return false;
+                return new_url;
             }
 
             stmt = conn.createStatement();
@@ -67,11 +68,11 @@ public class DaoUrl
 
         closeConnection();
 
-        url = this.findByReal(url);
-        url.shorten();
+        new_url = this.findByReal(url);
+        new_url.shorten();
         this.update(url.getId(), url);
 
-        return true;
+        return new_url;
     }
 
     public void update(long id, Url url){
